@@ -8,7 +8,7 @@ async fn main() -> Result<()> {
 
     let ngrok_path = &Path::new("ngrok");
 
-    download::bin(ngrok_path).await?;
+    download::download(ngrok_path).await?;
 
     let auth_token: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Enter NGROK auth token")

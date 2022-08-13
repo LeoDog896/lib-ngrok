@@ -7,7 +7,7 @@ async fn main() -> Result<()> {
 
     let ngrok_path = &Path::new("ngrok");
 
-    download::bin(ngrok_path).await?;
+    download::download(ngrok_path).await?;
 
     println!("Binary downloaded!");
 

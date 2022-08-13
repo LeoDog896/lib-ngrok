@@ -2,9 +2,11 @@
 
 rust crate for downloading and running an ngrok binary.
 
-## examples
-
-```sh
-cargo run -- example download
+```rs
+use lib_ngrok::download;
+ 
+async fn download() -> Result<(), anyhow::Error> {
+    let ngrok_path = &Path::new("ngrok");
+    download::bin(ngrok_path).await?;
+}
 ```
-downloads the latest ngrok binary
