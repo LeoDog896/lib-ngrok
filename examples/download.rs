@@ -9,5 +9,7 @@ async fn main() -> Result<()> {
 
     download::bin(ngrok_path).await?;
 
+    println!("Binary downloaded!");
+
     Ok(())
 }
