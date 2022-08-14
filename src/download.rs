@@ -1,9 +1,15 @@
 use crate::url::NGROK_PATH;
 use bytes::Buf;
 use flate2::read::GzDecoder;
-use std::{ffi::OsStr, fs::File, io::{self, Write}, io::copy, path::Path};
-use zip::ZipArchive;
+use std::{
+    ffi::OsStr,
+    fs::File,
+    io::copy,
+    io::{self, Write},
+    path::Path,
+};
 use tar::Archive;
+use zip::ZipArchive;
 
 #[derive(thiserror::Error, Debug)]
 pub enum DownloadError {
@@ -22,14 +28,14 @@ pub enum DownloadError {
 }
 
 /// Downloads the ngrok binary to a path.
-pub async fn download(output: &Path) -> Result<(), DownloadError> {
-    download_to(&mut File::create(output)?).await
+pub async fn to_path(output: &Path) -> Result<(), DownloadError> {
+    to_write(&mut File::create(output)?).await
 }
 
 /// Downloads the ngrok binary to a writable.
-/// 
+///
 /// There are no cache options as ngrok doesn't have any versioning. If you're bundling this with an application, it's reccomended to download this whenever needed.
-pub async fn download_to(output: &mut impl Write) -> Result<(), DownloadError> {
+pub async fn to_write(output: &mut impl Write) -> Result<(), DownloadError> {
     // Download the ngrok binary
     let mut bytes = reqwest::get(NGROK_PATH).await?.bytes().await?.reader();
 
