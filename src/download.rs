@@ -2,6 +2,7 @@ use crate::url::NGROK_PATH;
 use bytes::Buf;
 use flate2::read::GzDecoder;
 use std::{ffi::OsStr, fs::File, io::{self, Write}, io::copy, path::Path};
+use zip::ZipArchive;
 use tar::Archive;
 
 #[derive(thiserror::Error, Debug)]
@@ -16,6 +17,8 @@ pub enum DownloadError {
     NoFiles,
     #[error("Could not download file")]
     Reqwest(#[from] reqwest::Error),
+    #[error("Could not unzip file")]
+    Unzip(#[from] zip::result::ZipError),
 }
 
 /// Downloads the ngrok binary to a path.
@@ -28,12 +31,19 @@ pub async fn download(output: &Path) -> Result<(), DownloadError> {
 /// There are no cache options as ngrok doesn't have any versioning. If you're bundling this with an application, it's reccomended to download this whenever needed.
 pub async fn download_to(output: &mut impl Write) -> Result<(), DownloadError> {
     // Download the ngrok binary
-    let bytes = reqwest::get(NGROK_PATH).await?.bytes().await?.reader();
+    let mut bytes = reqwest::get(NGROK_PATH).await?.bytes().await?.reader();
 
     // Unzip it
     return match Path::new(NGROK_PATH).extension().and_then(OsStr::to_str) {
         Some(ext) if ext == "zip" => {
-            todo!("Unzip the zip file");
+            let mut tempfile = tempfile::tempfile()?;
+            copy(&mut bytes, &mut tempfile)?;
+
+            let mut archive = ZipArchive::new(tempfile)?;
+
+            copy(&mut archive.by_index(0)?, output)?;
+
+            Ok(())
         }
         Some(ext) if ext == "tgz" => {
             let decompress_stream = GzDecoder::new(bytes);
