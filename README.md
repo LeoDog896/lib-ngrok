@@ -7,6 +7,6 @@ use lib_ngrok::download;
  
 async fn download() -> Result<(), anyhow::Error> {
     let ngrok_path = &Path::new("ngrok");
-    download::bin(ngrok_path).await?;
+    download::to_path(ngrok_path).await?;
 }
 ```
